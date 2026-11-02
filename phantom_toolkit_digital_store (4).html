@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phantom Toolkit - Digital Products Store</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Hide scrollbars for modal scroll control */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden antialiased">
+
+    <!-- Global Loading Spinner Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center transition-opacity duration-300 hidden">
+        <div class="relative flex items-center justify-center">
+            <div class="w-16 h-16 border-4 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
+            <i class="fa-solid fa-ghost text-brand-500 text-xl absolute"></i>
+        </div>
+        <p id="loadingText" class="mt-4 text-sm font-medium text-slate-300 animate-pulse">Loading Phantom Toolkit...</p>
+    </div>
+
+    <!-- Global Toast Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-[110] flex flex-col gap-3 max-w-md w-full px-4 pointer-events-none"></div>
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="handleLogoClick()">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-brand-500/20">
+                    <i class="fa-solid fa-ghost"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        Phantom <span class="text-brand-500">Toolkit</span>
+                        <span class="text-[10px] bg-brand-500/10 border border-brand-500/30 text-brand-400 px-2 py-0.5 rounded-full font-semibold">PK</span>
+                    </h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Digital Products Store</p>
+                </div>
+            </div>
+
+            <!-- Dynamic Header Actions -->
+            <div id="headerActions" class="flex items-center gap-3">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN STOREFRONT VIEW (Only visible when user logged in) -->
+    <main id="storefrontView" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 hidden">
+        <!-- Hero Banner -->
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-800 p-6 sm:p-10 mb-8 shadow-2xl">
+            <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative z-10 max-w-2xl">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-4">
+                    <i class="fa-solid fa-bolt text-xs"></i> Verified Premium Digital Assets
+                </span>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
+                    Unlock Premium Software & Digital Assets
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base">
+                    Get instant access to top-rated digital tools, accounts, and utility packages. Fast approval and direct Google Drive links.
+                </p>
+            </div>
+        </div>
+
+        <!-- Section Title & Search/Filter -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-brand-500"></i> Available Products
+                </h3>
+                <p class="text-xs text-slate-400">All prices are listed in Pakistani Rupees (PKR)</p>
+            </div>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                <input type="text" id="productSearch" oninput="filterProducts()" placeholder="Search products..." class="w-full sm:w-64 bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-brand-500 transition">
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Product cards injected dynamically -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyStoreState" class="hidden text-center py-16 bg-slate-900/50 rounded-2xl border border-slate-800/80 my-4">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 text-2xl">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+            <h4 class="text-lg font-semibold text-slate-300">No Products Available</h4>
+            <p class="text-slate-500 text-sm mt-1">Check back later or contact customer support.</p>
+        </div>
+    </main>
+
+    <!-- ADMIN DASHBOARD VIEW -->
+    <main id="adminView" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 hidden">
+        <!-- Admin Navigation Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-8 border-b border-slate-800">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                        ADMIN PANEL
+                    </span>
+                    <h2 class="text-2xl font-bold text-white">Management Console</h2>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Manage products, approve buying requests, and configure store settings.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="exitAdminView()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition border border-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-store"></i> View Storefront
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin Tabs -->
+        <div class="flex border-b border-slate-800 mb-6 gap-6">
+            <button onclick="switchAdminTab('products')" id="tabBtnProducts" class="pb-3 text-sm font-semibold border-b-2 border-brand-500 text-brand-400 flex items-center gap-2">
+                <i class="fa-solid fa-box"></i> Products Management
+            </button>
+            <button onclick="switchAdminTab('requests')" id="tabBtnRequests" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 relative">
+                <i class="fa-solid fa-clock-rotate-left"></i> Customer Requests
+                <span id="pendingBadge" class="hidden ml-1 px-2 py-0.5 text-[10px] bg-brand-500 text-slate-950 font-extrabold rounded-full">0</span>
+            </button>
+            <button onclick="switchAdminTab('settings')" id="tabBtnSettings" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-gear"></i> Store Settings
+            </button>
+        </div>
+
+        <!-- TAB 1: Products Management -->
+        <div id="adminTabProducts" class="space-y-8">
+            <!-- Add Product Form Card -->
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle text-brand-500"></i> Upload New Digital Product
+                </h3>
+                <form id="addProductForm" onsubmit="handleAddProduct(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Product Title *</label>
+                        <input type="text" id="adminProdTitle" required placeholder="e.g. Canva Pro Lifetime Account" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Price in PKR (Rs.) *</label>
+                        <input type="number" id="adminProdPrice" min="0" required placeholder="e.g. 1500" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Product Image URL *</label>
+                        <input type="url" id="adminProdImg" required placeholder="https://images.unsplash.com/photo-..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Product / Download Link *</label>
+                        <input type="url" id="adminProdDrive" required placeholder="https://mediafire.com/..., https://terabox.com/..., etc." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div class="md:col-span-2 flex justify-end mt-2">
+                        <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Add Product
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Existing Products List -->
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 overflow-hidden">
+                <h3 class="text-lg font-bold text-white mb-4">Existing Store Products</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-950 text-slate-400 uppercase text-[11px] tracking-wider border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">Product</th>
+                                <th class="p-3">Price</th>
+                                <th class="p-3">Download Link</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminProductsTable" class="divide-y divide-slate-800">
+                            <!-- Rows injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Customer Buying Requests -->
+        <div id="adminTabRequests" class="hidden space-y-6">
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 overflow-hidden">
+                <h3 class="text-lg font-bold text-white mb-4">Customer Purchase Requests</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-950 text-slate-400 uppercase text-[11px] tracking-wider border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">Customer</th>
+                                <th class="p-3">Product Title</th>
+                                <th class="p-3">WhatsApp / Phone</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminRequestsTable" class="divide-y divide-slate-800">
+                            <!-- Rows injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Store Settings -->
+        <div id="adminTabSettings" class="hidden space-y-6">
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 max-w-xl">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-headset text-brand-500"></i> Store Support Configuration
+                </h3>
+                <form id="settingsForm" onsubmit="handleSaveSettings(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Customer Support Email</label>
+                        <input type="email" id="supportEmailInput" required placeholder="support@phantom.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                        <p class="text-[11px] text-slate-500 mt-1">This email will automatically reflect in the storefront footer.</p>
+                    </div>
+                    <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+                        Save Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 mt-auto py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-ghost text-brand-500"></i>
+                <span class="text-sm font-semibold text-slate-300">Phantom Toolkit &copy; 2026</span>
+            </div>
+            <div class="text-xs text-slate-400 flex items-center gap-1">
+                <span>Support Email:</span>
+                <a id="footerSupportEmail" href="mailto:support@phantom.com" class="text-brand-400 hover:underline font-medium">support@phantom.com</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL 1: ENTRY MODAL (OVERLAY) -->
+    <div id="entryModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden">
+            <div class="w-16 h-16 bg-gradient-to-tr from-brand-600 to-emerald-400 rounded-2xl mx-auto mb-6 flex items-center justify-center text-slate-950 text-3xl font-black shadow-lg shadow-brand-500/30">
+                <i class="fa-solid fa-ghost"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-white tracking-tight mb-2">Welcome to Phantom Toolkit</h3>
+            <p class="text-sm text-slate-400 mb-8">Select your destination to proceed into the store portal.</p>
+            
+            <div class="space-y-4">
+                <button onclick="handleEntryChoice('store')" class="w-full py-3.5 bg-brand-600 hover:bg-brand-500 text-slate-950 font-extrabold rounded-2xl text-base transition shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-store"></i> Open Store
+                </button>
+                <button onclick="handleEntryChoice('admin')" class="w-full py-2.5 text-xs text-slate-400 hover:text-slate-200 transition font-medium flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-lock text-[10px]"></i> Admin Panel Access
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CUSTOMER AUTH (LOGIN / SIGNUP) -->
+    <div id="authModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative">
+            <!-- Close / Back to Entry -->
+            <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <h3 id="authTitle" class="text-xl font-bold text-white">Sign In to Your Account</h3>
+                <p class="text-xs text-slate-400 mt-1">Access purchased links and request digital tools</p>
+            </div>
+
+            <form id="customerAuthForm" onsubmit="handleCustomerAuth(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Username</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                        <input type="text" id="authUsername" required placeholder="e.g. hussnain_99" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Password</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                        <input type="password" id="authPassword" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <button type="submit" id="authSubmitBtn" class="w-full py-3 bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="mt-6 text-center border-t border-slate-800 pt-4">
+                <p id="authToggleText" class="text-xs text-slate-400">
+                    Don't have an account? 
+                    <button type="button" onclick="toggleAuthMode()" class="text-brand-400 hover:underline font-semibold ml-1">Sign Up</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: ADMIN LOGIN -->
+    <div id="adminLoginModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative">
+            <button onclick="closeAdminLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-xl mx-auto mb-3 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Admin Authentication</h3>
+                <p class="text-xs text-slate-400 mt-1">Restricted area for Phantom Toolkit administrators</p>
+            </div>
+
+            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Admin Username</label>
+                    <input type="text" id="adminUser" required placeholder="Admin username" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Admin Password</label>
+                    <input type="password" id="adminPass" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-amber-500/20">
+                    Verify Admin Credentials
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 4: BUY NOW / CONTACT INFO PROMPT -->
+    <div id="buyModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative">
+            <button onclick="closeBuyModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <h3 class="text-xl font-bold text-white">Request Purchase Access</h3>
+                <p id="buyProductTitle" class="text-xs text-brand-400 font-semibold mt-1">Product Title</p>
+            </div>
+
+            <form id="buyForm" onsubmit="submitPurchaseRequest(event)" class="space-y-4">
+                <input type="hidden" id="buyProductId">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">WhatsApp or Phone Number *</label>
+                    <div class="relative">
+                        <i class="fa-brands fa-whatsapp absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                        <input type="text" id="buyContact" required placeholder="0300 1234567" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1">The store admin will use this number to verify your payment.</p>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+                    Submit Order Request
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FIREBASE MODULE & APPLICATION CODE -->
+    <script type="module">
+        // Firebase v9+ Modular SDK Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            onAuthStateChanged, 
+            signOut,
+            setPersistence,
+            browserLocalPersistence
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            addDoc, 
+            getDocs, 
+            getDoc, 
+            setDoc, 
+            deleteDoc, 
+            query, 
+            where, 
+            onSnapshot,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        /* 
+           ===================================================================
+           PASTE YOUR ACTUAL FIREBASE CONFIGURATION OBJECT BELOW
+           ===================================================================
+        */
+        const firebaseConfig = {
+          apiKey: "AIzaSyCZhLNtFcNr9DAj9OCDDION2Wdo23KzuUo",
+          authDomain: "phantom-toolkit.firebaseapp.com",
+          projectId: "phantom-toolkit",
+          storageBucket: "phantom-toolkit.firebasestorage.app",
+          messagingSenderId: "607044594987",
+          appId: "1:607044594987:web:993c86db022d5dbd18e96e"
+        };
+
+        // Internal State
+        const state = {
+            currentUser: null, // { uid, username, email }
+            isAdmin: false,
+            isAuthSignUp: false,
+            products: [],
+            userRequests: [],
+            allRequests: [],
+            supportEmail: 'support@phantom.com'
+        };
+
+        // Global Firebase instances
+        let app, auth, db;
+        let isFirebaseActive = false;
+
+        // Initialize Firebase safely
+        try {
+            if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("YOUR_ACTUAL_API_KEY")) {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                // Set Auth Local Persistence
+                setPersistence(auth, browserLocalPersistence).catch(console.error);
+                isFirebaseActive = true;
+                console.log("Firebase initialized successfully.");
+            } else {
+                console.warn("Placeholder Firebase Config detected. Operating in Local Demo Mode.");
+            }
+        } catch (err) {
+            console.error("Firebase init error:", err);
+        }
+
+        // --- DOM HELPER FUNCTIONS ---
+        function showLoader(msg = "Processing...") {
+            document.getElementById('loadingText').innerText = msg;
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgBorder = 'bg-slate-900 border-slate-700 text-slate-200';
+            let icon = '<i class="fa-solid fa-circle-info text-blue-400"></i>';
+            
+            if (type === 'success') {
+                bgBorder = 'bg-slate-900 border-brand-500/50 text-slate-100';
+                icon = '<i class="fa-solid fa-circle-check text-brand-500"></i>';
+            } else if (type === 'error') {
+                bgBorder = 'bg-slate-900 border-rose-500/50 text-slate-100';
+                icon = '<i class="fa-solid fa-circle-exclamation text-rose-500"></i>';
+            }
+
+            toast.className = `p-4 rounded-xl border ${bgBorder} shadow-xl flex items-center gap-3 text-sm pointer-events-auto transform transition duration-300 translate-y-2 opacity-0`;
+            toast.innerHTML = `${icon}<span class="flex-grow">${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            // Animate In
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            // Auto Remove
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function updateScrollLock() {
+            const modals = ['entryModal', 'authModal', 'adminLoginModal', 'buyModal'];
+            const anyOpen = modals.some(id => !document.getElementById(id).classList.contains('hidden'));
+            if (anyOpen) {
+                document.body.classList.add('overflow-hidden');
+            } else {
+                document.body.classList.remove('overflow-hidden');
+            }
+        }
+
+        // --- AUTH & HEADER LOGIC ---
+        function updateHeaderUI() {
+            const container = document.getElementById('headerActions');
+            if (state.isAdmin) {
+                container.innerHTML = `
+                    <span class="text-xs bg-amber-500/10 border border-amber-500/30 text-amber-400 px-3 py-1 rounded-full font-semibold">
+                        <i class="fa-solid fa-shield-halved"></i> Admin Mode
+                    </span>
+                    <button onclick="handleSignOut()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300">
+                        Logout
+                    </button>
+                `;
+            } else if (state.currentUser) {
+                container.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-brand-600 text-slate-950 flex items-center justify-center font-extrabold text-xs uppercase shadow">
+                            ${state.currentUser.username.substring(0, 2)}
+                        </div>
+                        <span class="text-xs font-semibold text-slate-200 hidden sm:inline">${state.currentUser.username}</span>
+                    </div>
+                    <button onclick="handleSignOut()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300">
+                        Logout
+                    </button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button onclick="openAuthModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-slate-950 rounded-xl text-xs font-bold shadow-md shadow-brand-500/20">
+                        Sign In / Sign Up
+                    </button>
+                `;
+            }
+        }
+
+        // Listen for Firebase Auth Changes
+        if (isFirebaseActive) {
+            onAuthStateChanged(auth, async (user) => {
+                if (user && !state.isAdmin) {
+                    const username = user.email ? user.email.split('@')[0] : 'User';
+                    state.currentUser = { uid: user.uid, username, email: user.email };
+                    document.getElementById('entryModal').classList.add('hidden');
+                    document.getElementById('authModal').classList.add('hidden');
+                    document.getElementById('storefrontView').classList.remove('hidden');
+                    updateHeaderUI();
+                    subscribeToData();
+                } else if (!user && !state.isAdmin) {
+                    state.currentUser = null;
+                    document.getElementById('storefrontView').classList.add('hidden');
+                    updateHeaderUI();
+                }
+                updateScrollLock();
+            });
+        }
+
+        // --- EVENT HANDLERS & WINDOW EXPOSURES ---
+        window.handleLogoClick = function() {
+            if (state.currentUser) {
+                document.getElementById('adminView').classList.add('hidden');
+                document.getElementById('storefrontView').classList.remove('hidden');
+            } else if (!state.isAdmin) {
+                document.getElementById('entryModal').classList.remove('hidden');
+                updateScrollLock();
+            }
+        };
+
+        window.handleEntryChoice = function(choice) {
+            document.getElementById('entryModal').classList.add('hidden');
+            if (choice === 'store') {
+                if (!state.currentUser) {
+                    document.getElementById('authModal').classList.remove('hidden');
+                } else {
+                    document.getElementById('storefrontView').classList.remove('hidden');
+                }
+            } else if (choice === 'admin') {
+                document.getElementById('adminLoginModal').classList.remove('hidden');
+            }
+            updateScrollLock();
+        };
+
+        window.openAuthModal = function() {
+            document.getElementById('authModal').classList.remove('hidden');
+            updateScrollLock();
+        };
+
+        window.closeAuthModal = function() {
+            document.getElementById('authModal').classList.add('hidden');
+            if (!state.currentUser && !state.isAdmin) {
+                document.getElementById('entryModal').classList.remove('hidden');
+            }
+            updateScrollLock();
+        };
+
+        window.closeAdminLoginModal = function() {
+            document.getElementById('adminLoginModal').classList.add('hidden');
+            if (!state.currentUser && !state.isAdmin) {
+                document.getElementById('entryModal').classList.remove('hidden');
+            }
+            updateScrollLock();
+        };
+
+        window.toggleAuthMode = function() {
+            state.isAuthSignUp = !state.isAuthSignUp;
+            const title = document.getElementById('authTitle');
+            const submitBtn = document.getElementById('authSubmitBtn');
+            const toggleText = document.getElementById('authToggleText');
+
+            if (state.isAuthSignUp) {
+                title.innerText = "Create Phantom Account";
+                submitBtn.innerText = "Sign Up";
+                toggleText.innerHTML = `Already have an account? <button type="button" onclick="toggleAuthMode()" class="text-brand-400 hover:underline font-semibold ml-1">Sign In</button>`;
+            } else {
+                title.innerText = "Sign In to Your Account";
+                submitBtn.innerText = "Sign In";
+                toggleText.innerHTML = `Don't have an account? <button type="button" onclick="toggleAuthMode()" class="text-brand-400 hover:underline font-semibold ml-1">Sign Up</button>`;
+            }
+        };
+
+        window.handleCustomerAuth = async function(e) {
+            e.preventDefault();
+            const rawUser = document.getElementById('authUsername').value.trim();
+            const password = document.getElementById('authPassword').value;
+
+            if (!rawUser || !password) return;
+            const maskedEmail = `${rawUser.toLowerCase()}@phantom.com`;
+
+            showLoader(state.isAuthSignUp ? "Creating Account..." : "Signing In...");
+
+            try {
+                if (isFirebaseActive) {
+                    if (state.isAuthSignUp) {
+                        const cred = await createUserWithEmailAndPassword(auth, maskedEmail, password);
+                        state.currentUser = { uid: cred.user.uid, username: rawUser, email: maskedEmail };
+                    } else {
+                        const cred = await signInWithEmailAndPassword(auth, maskedEmail, password);
+                        state.currentUser = { uid: cred.user.uid, username: rawUser, email: maskedEmail };
+                    }
+                } else {
+                    // Demo fallback when Firebase API keys are not provided
+                    state.currentUser = { uid: 'demo-' + Date.now(), username: rawUser, email: maskedEmail };
+                    document.getElementById('storefrontView').classList.remove('hidden');
+                    subscribeToData();
+                }
+
+                showToast(`Welcome ${rawUser}!`, 'success');
+                document.getElementById('authModal').classList.add('hidden');
+                document.getElementById('storefrontView').classList.remove('hidden');
+                updateHeaderUI();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || "Authentication failed.", 'error');
+            } finally {
+                hideLoader();
+                updateScrollLock();
+            }
+        };
+
+        window.handleAdminLogin = function(e) {
+            e.preventDefault();
+            const user = document.getElementById('adminUser').value.trim();
+            const pass = document.getElementById('adminPass').value;
+
+            if (user === "Admin15700" && pass === "Hussnain15700") {
+                state.isAdmin = true;
+                showToast("Admin credentials verified!", "success");
+                document.getElementById('adminLoginModal').classList.add('hidden');
+                document.getElementById('storefrontView').classList.add('hidden');
+                document.getElementById('adminView').classList.remove('hidden');
+                updateHeaderUI();
+                subscribeToData();
+            } else {
+                showToast("Invalid admin credentials!", "error");
+            }
+            updateScrollLock();
+        };
+
+        window.handleSignOut = async function() {
+            showLoader("Signing Out...");
+            try {
+                if (isFirebaseActive && auth.currentUser) {
+                    await signOut(auth);
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                state.currentUser = null;
+                state.isAdmin = false;
+                document.getElementById('storefrontView').classList.add('hidden');
+                document.getElementById('adminView').classList.add('hidden');
+                document.getElementById('authModal').classList.remove('hidden');
+                updateHeaderUI();
+                hideLoader();
+                updateScrollLock();
+                showToast("Signed out successfully.", "info");
+            }
+        };
+
+        window.exitAdminView = function() {
+            document.getElementById('adminView').classList.add('hidden');
+            if (state.currentUser) {
+                document.getElementById('storefrontView').classList.remove('hidden');
+            } else {
+                document.getElementById('authModal').classList.remove('hidden');
+            }
+            updateScrollLock();
+        };
+
+        // --- ADMIN DASHBOARD TABS & ACTIONS ---
+        window.switchAdminTab = function(tab) {
+            ['products', 'requests', 'settings'].forEach(t => {
+                const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                const content = document.getElementById(`adminTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (t === tab) {
+                    btn.className = "pb-3 text-sm font-semibold border-b-2 border-brand-500 text-brand-400 flex items-center gap-2";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2";
+                    content.classList.add('hidden');
+                }
+            });
+        };
+
+        window.handleAddProduct = async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('adminProdTitle').value.trim();
+            const price = parseFloat(document.getElementById('adminProdPrice').value);
+            const imageUrl = document.getElementById('adminProdImg').value.trim();
+            const driveLink = document.getElementById('adminProdDrive').value.trim();
+
+            if (!title || isNaN(price) || !imageUrl || !driveLink) {
+                showToast("Please fill in all required fields correctly.", "error");
+                return;
+            }
+
+            showLoader("Uploading product...");
+            try {
+                // Ensure plain ISO string timestamp for cross-platform Firestore compatibility
+                const productData = { 
+                    title: title, 
+                    price: price, 
+                    imageUrl: imageUrl, 
+                    driveLink: driveLink, 
+                    createdAt: new Date().toISOString() 
+                };
+
+                if (isFirebaseActive) {
+                    await addDoc(collection(db, "products"), productData);
+                } else {
+                    state.products.push({ id: 'demo-' + Date.now(), ...productData });
+                    renderProducts();
+                    renderAdminProducts();
+                }
+                showToast("Product added successfully!", "success");
+                document.getElementById('addProductForm').reset();
+            } catch (err) {
+                console.error("Firestore error adding product:", err);
+                const errMsg = err.code === 'permission-denied' 
+                    ? "Firestore security rules denied permission. Make sure Firestore rules are set to allow write."
+                    : (err.message || "Failed to add product to database.");
+                showToast(errMsg, "error");
+            } finally {
+                hideLoader();
+            }
+        };
+
+        window.deleteProduct = async function(id) {
+            showLoader("Deleting product...");
+            try {
+                if (isFirebaseActive) {
+                    await deleteDoc(doc(db, "products", id));
+                } else {
+                    state.products = state.products.filter(p => p.id !== id);
+                    renderProducts();
+                    renderAdminProducts();
+                }
+                showToast("Product removed.", "info");
+            } catch (err) {
+                console.error(err);
+                showToast("Error removing product.", "error");
+            } finally {
+                hideLoader();
+            }
+        };
+
+        window.updateRequestStatus = async function(reqId, newStatus) {
+            showLoader("Updating request status...");
+            try {
+                if (isFirebaseActive) {
+                    await setDoc(doc(db, "requests", reqId), { status: newStatus }, { merge: true });
+                } else {
+                    const r = state.allRequests.find(item => item.id === reqId);
+                    if (r) r.status = newStatus;
+                    renderAdminRequests();
+                    renderProducts();
+                }
+                showToast(`Request marked as ${newStatus}`, "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Error updating request.", "error");
+            } finally {
+                hideLoader();
+            }
+        };
+
+        window.handleSaveSettings = async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('supportEmailInput').value.trim();
+            if (!email) return;
+
+            showLoader("Saving settings...");
+            try {
+                if (isFirebaseActive) {
+                    await setDoc(doc(db, "settings", "config"), { supportEmail: email }, { merge: true });
+                } else {
+                    state.supportEmail = email;
+                    document.getElementById('footerSupportEmail').innerText = email;
+                    document.getElementById('footerSupportEmail').href = `mailto:${email}`;
+                }
+                showToast("Support email updated!", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to update settings.", "error");
+            } finally {
+                hideLoader();
+            }
+        };
+
+        // --- BUY LOGIC & DIALOG ---
+        window.openBuyModal = function(productId, productTitle) {
+            document.getElementById('buyProductId').value = productId;
+            document.getElementById('buyProductTitle').innerText = productTitle;
+            document.getElementById('buyModal').classList.remove('hidden');
+            updateScrollLock();
+        };
+
+        window.closeBuyModal = function() {
+            document.getElementById('buyModal').classList.add('hidden');
+            updateScrollLock();
+        };
+
+        window.submitPurchaseRequest = async function(e) {
+            e.preventDefault();
+            const productId = document.getElementById('buyProductId').value;
+            const contactInfo = document.getElementById('buyContact').value.trim();
+            const product = state.products.find(p => p.id === productId);
+
+            if (!productId || !contactInfo || !state.currentUser) return;
+
+            showLoader("Submitting request...");
+            try {
+                const reqData = {
+                    userId: state.currentUser.uid,
+                    username: state.currentUser.username,
+                    productId: productId,
+                    productTitle: product ? product.title : 'Digital Product',
+                    contactInfo: contactInfo,
+                    status: 'pending',
+                    timestamp: new Date()
+                };
+
+                if (isFirebaseActive) {
+                    await addDoc(collection(db, "requests"), reqData);
+                } else {
+                    state.userRequests.push({ id: 'req-' + Date.now(), ...reqData });
+                    state.allRequests.push({ id: 'req-' + Date.now(), ...reqData });
+                    renderProducts();
+                }
+
+                showToast("Request submitted! Pending admin approval.", "success");
+                closeBuyModal();
+                document.getElementById('buyForm').reset();
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to submit purchase request.", "error");
+            } finally {
+                hideLoader();
+            }
+        };
+
+        // --- DATA RENDERING & REALTIME SUBSCRIPTIONS ---
+        function subscribeToData() {
+            if (!isFirebaseActive) {
+                // Populate initial mock data if no Firebase keys exist
+                if (state.products.length === 0) {
+                    state.products = [
+                        {
+                            id: 'demo-1',
+                            title: 'Canva Pro Premium Account (1 Year)',
+                            price: 1200,
+                            imageUrl: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&auto=format&fit=crop&q=80',
+                            driveLink: 'https://drive.google.com'
+                        },
+                        {
+                            id: 'demo-2',
+                            title: 'Python Full-Stack Automation Toolkit',
+                            price: 2500,
+                            imageUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80',
+                            driveLink: 'https://drive.google.com'
+                        }
+                    ];
+                }
+                renderProducts();
+                renderAdminProducts();
+                renderAdminRequests();
+                return;
+            }
+
+            // Realtime Products
+            onSnapshot(collection(db, "products"), (snapshot) => {
+                state.products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderProducts();
+                if (state.isAdmin) renderAdminProducts();
+            });
+
+            // Realtime Config Settings
+            onSnapshot(doc(db, "settings", "config"), (snapshot) => {
+                if (snapshot.exists() && snapshot.data().supportEmail) {
+                    state.supportEmail = snapshot.data().supportEmail;
+                    document.getElementById('footerSupportEmail').innerText = state.supportEmail;
+                    document.getElementById('footerSupportEmail').href = `mailto:${state.supportEmail}`;
+                    document.getElementById('supportEmailInput').value = state.supportEmail;
+                }
+            });
+
+            // Realtime Requests for Logged in User
+            if (state.currentUser && !state.isAdmin) {
+                const q = query(collection(db, "requests"), where("userId", "==", state.currentUser.uid));
+                onSnapshot(q, (snapshot) => {
+                    state.userRequests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderProducts();
+                });
+            }
+
+            // Realtime Requests for Admin
+            if (state.isAdmin) {
+                onSnapshot(collection(db, "requests"), (snapshot) => {
+                    state.allRequests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderAdminRequests();
+                });
+            }
+        }
+
+        window.filterProducts = function() {
+            renderProducts();
+        };
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            const emptyState = document.getElementById('emptyStoreState');
+            const searchVal = (document.getElementById('productSearch')?.value || '').toLowerCase();
+
+            const filtered = state.products.filter(p => p.title.toLowerCase().includes(searchVal));
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.innerHTML = filtered.map(p => {
+                // Determine user request status
+                const existingReq = state.userRequests.find(r => r.productId === p.id);
+                let actionBtnHTML = '';
+
+                if (existingReq) {
+                    if (existingReq.status === 'pending') {
+                        actionBtnHTML = `
+                            <button disabled class="w-full py-2.5 bg-slate-800 text-amber-400 font-semibold rounded-xl text-xs cursor-not-allowed border border-amber-500/30 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-hourglass-half animate-spin"></i> Request Pending
+                            </button>
+                        `;
+                    } else if (existingReq.status === 'approved') {
+                        actionBtnHTML = `
+                            <a href="${p.driveLink}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold rounded-xl text-xs transition shadow-lg shadow-brand-500/20 text-center flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-cloud-arrow-down text-sm"></i> Get Link
+                            </a>
+                        `;
+                    } else { // Rejected
+                        actionBtnHTML = `
+                            <button onclick="openBuyModal('${p.id}', '${escapeQuotes(p.title)}')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-rotate-right"></i> Re-apply (Buy Now)
+                            </button>
+                        `;
+                    }
+                } else {
+                    actionBtnHTML = `
+                        <button onclick="openBuyModal('${p.id}', '${escapeQuotes(p.title)}')" class="w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-slate-950 font-extrabold rounded-xl text-xs transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cart-shopping"></i> Buy Now
+                        </button>
+                    `;
+                }
+
+                return `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition flex flex-col group">
+                        <div class="h-48 overflow-hidden bg-slate-950 relative">
+                            <img src="${p.imageUrl}" alt="${p.title}" onerror="this.src='https://placehold.co/600x400/0f172a/10b981?text=Digital+Product'" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            <div class="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-brand-400 border border-brand-500/30">
+                                Rs. ${p.price.toLocaleString('en-PK')}
+                            </div>
+                        </div>
+                        <div class="p-5 flex flex-col flex-grow justify-between gap-4">
+                            <div>
+                                <h4 class="font-bold text-white text-base leading-snug line-clamp-2">${p.title}</h4>
+                            </div>
+                            <div>
+                                ${actionBtnHTML}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderAdminProducts() {
+            const tbody = document.getElementById('adminProductsTable');
+            if (state.products.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500 text-xs">No products uploaded yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = state.products.map(p => `
+                <tr class="hover:bg-slate-950/50">
+                    <td class="p-3 font-semibold text-slate-100 flex items-center gap-3">
+                        <img src="${p.imageUrl}" onerror="this.src='https://placehold.co/100x100/0f172a/10b981?text=Item'" class="w-10 h-10 rounded-lg object-cover">
+                        <span>${p.title}</span>
+                    </td>
+                    <td class="p-3 text-brand-400 font-bold">Rs. ${p.price.toLocaleString('en-PK')}</td>
+                    <td class="p-3">
+                        <a href="${p.driveLink}" target="_blank" class="text-xs text-blue-400 hover:underline flex items-center gap-1 max-w-[150px] truncate">
+                            <i class="fa-solid fa-external-link"></i> ${p.driveLink}
+                        </a>
+                    </td>
+                    <td class="p-3 text-right">
+                        <button onclick="deleteProduct('${p.id}')" class="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg text-xs font-semibold border border-rose-500/20 transition">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderAdminRequests() {
+            const tbody = document.getElementById('adminRequestsTable');
+            const pendingBadge = document.getElementById('pendingBadge');
+
+            const pendingCount = state.allRequests.filter(r => r.status === 'pending').length;
+            if (pendingCount > 0) {
+                pendingBadge.innerText = pendingCount;
+                pendingBadge.classList.remove('hidden');
+            } else {
+                pendingBadge.classList.add('hidden');
+            }
+
+            if (state.allRequests.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500 text-xs">No purchase requests submitted yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = state.allRequests.map(r => {
+                let statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">PENDING</span>`;
+                if (r.status === 'approved') {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-brand-500/10 text-brand-400 border border-brand-500/30">APPROVED</span>`;
+                } else if (r.status === 'rejected') {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">REJECTED</span>`;
+                }
+
+                return `
+                    <tr class="hover:bg-slate-950/50">
+                        <td class="p-3 font-semibold text-slate-200">${r.username}</td>
+                        <td class="p-3 text-slate-300">${r.productTitle}</td>
+                        <td class="p-3 font-mono text-brand-400 text-xs">${r.contactInfo}</td>
+                        <td class="p-3">${statusBadge}</td>
+                        <td class="p-3 text-right space-x-2">
+                            ${r.status !== 'approved' ? `
+                                <button onclick="updateRequestStatus('${r.id}', 'approved')" class="px-3 py-1 bg-brand-600 hover:bg-brand-500 text-slate-950 rounded-lg text-xs font-bold transition">
+                                    Approve
+                                </button>
+                            ` : ''}
+                            ${r.status !== 'rejected' ? `
+                                <button onclick="updateRequestStatus('${r.id}', 'rejected')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-rose-400 rounded-lg text-xs font-semibold border border-slate-700 transition">
+                                    Reject
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function escapeQuotes(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        // Initialize App UI
+        window.addEventListener('DOMContentLoaded', () => {
+            updateHeaderUI();
+            updateScrollLock();
+        });
+    </script>
+</body>
+</html>
